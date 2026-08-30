@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0F1319">
+<title>佐渡島・黄金ルート紀行 ｜ 2026.8.8 – 8.11</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Barlow+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0F1319; --rock:#171E26; --rock2:#1F2832; --line:#2C3742;
+  --gold:#C99A3F; --gold-lit:#EBC978; --verdigris:#6F9E8B; --toki:#E8A0A8;
+  --paper:#E9E3D6; --muted:#8B95A1;
+  --sans:"Zen Kaku Gothic New",system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;
+  --serif:"Shippori Mincho B1",serif;
+  --cond:"Barlow Condensed","Zen Kaku Gothic New",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--ink);color:var(--paper);font-family:var(--sans);
+  font-size:15px;line-height:1.75;-webkit-text-size-adjust:100%;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+
+header{
+  position:relative;z-index:1200;
+  padding:calc(12px + env(safe-area-inset-top)) 20px 0;
+  border-bottom:1px solid var(--line);background:linear-gradient(180deg,#131A22,#10161D);
+}
+.masthead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--serif);font-weight:700;font-size:clamp(18px,2.6vw,26px);margin:0;letter-spacing:.06em}
+h1 .gild{background:linear-gradient(100deg,var(--gold) 10%,var(--gold-lit) 45%,var(--gold) 80%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.dek{font-family:var(--cond);font-size:13px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}
+.tag{font-size:12px;color:var(--muted);margin:3px 0 0;line-height:1.6;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#mode{
+  font-family:var(--cond);font-size:11.5px;letter-spacing:.1em;padding:2px 8px;border-radius:2px;
+  border:1px solid var(--line);color:var(--muted);white-space:nowrap;
+}
+#mode.live{border-color:rgba(111,158,139,.5);color:var(--verdigris)}
+#mode.solo{border-color:rgba(201,154,63,.4);color:var(--gold)}
+#mode button{background:none;border:0;color:inherit;font:inherit;cursor:pointer;text-decoration:underline;padding:0 0 0 6px}
+
+nav{display:flex;gap:2px;margin-top:10px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+nav::-webkit-scrollbar{display:none}
+nav button{
+  appearance:none;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);
+  font-family:var(--sans);font-size:13px;font-weight:500;padding:8px 14px 9px;cursor:pointer;
+  white-space:nowrap;transition:color .18s,border-color .18s;
+}
+nav button .d{font-family:var(--cond);font-size:15px;letter-spacing:.06em;margin-right:6px;color:var(--gold);opacity:.7}
+nav button:hover{color:var(--paper)}
+nav button[aria-selected="true"]{color:var(--paper);border-bottom-color:var(--gold)}
+nav button[aria-selected="true"] .d{opacity:1}
+nav button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px;border-radius:3px}
+
+main{display:flex;height:calc(100dvh - 104px)}
+#panel{
+  width:400px;flex:0 0 400px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  background:var(--rock);border-right:1px solid var(--line);
+  padding:16px 0 calc(60px + env(safe-area-inset-bottom));
+}
+#map{flex:1;background:#0C1116;min-width:0;position:relative}
+
+.chapter{font-family:var(--serif);font-size:13px;letter-spacing:.2em;color:var(--gold);
+  padding:20px 22px 8px;border-top:1px solid var(--line);margin-top:8px}
+.chapter:first-of-type{border-top:0;margin-top:0}
+.chapter small{display:block;font-family:var(--cond);letter-spacing:.1em;color:var(--muted);font-size:12px;margin-top:2px}
+
+.entry{border-bottom:1px solid rgba(44,55,66,.55)}
+.entry-head{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:start;width:100%;
+  text-align:left;background:none;border:0;color:inherit;padding:14px 20px;cursor:pointer;font-family:inherit}
+.entry-head:hover{background:rgba(201,154,63,.05)}
+.entry-head:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+.entry.is-open .entry-head{background:rgba(201,154,63,.07)}
+
+.glyph{width:26px;height:26px;margin-top:3px;position:relative}
+.glyph i{position:absolute;inset:0;display:block;
+  clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);background:var(--gold)}
+.glyph.toki i{background:var(--toki)}
+.glyph.pivot i{background:var(--verdigris)}
+.glyph.lost i{background:transparent;box-shadow:inset 0 0 0 1.5px var(--muted)}
+.glyph.guess i{background:transparent;box-shadow:inset 0 0 0 1.5px var(--gold);opacity:.65}
+.glyph b{position:absolute;inset:0;display:grid;place-items:center;
+  font-family:var(--cond);font-size:13px;font-weight:600;color:#0F1319}
+.glyph.lost b{color:var(--muted)}
+.glyph.guess b{color:var(--gold)}
+
+.entry-name{font-size:15px;font-weight:500;line-height:1.5}
+.entry-sub{font-size:12px;color:var(--muted);margin-top:2px;font-family:var(--cond);letter-spacing:.06em;display:block}
+.count{font-family:var(--cond);font-size:12px;color:var(--gold);letter-spacing:.08em;margin-left:8px}
+.state{font-size:10.5px;letter-spacing:.1em;padding:3px 7px;border-radius:2px;white-space:nowrap;margin-top:3px}
+.state.plan{background:rgba(201,154,63,.14);color:var(--gold-lit)}
+.state.pivot{background:rgba(111,158,139,.16);color:var(--verdigris)}
+.state.lost{background:rgba(139,149,161,.14);color:var(--muted)}
+
+.entry-body{display:none;padding:0 20px 22px 66px}
+.entry.is-open .entry-body{display:block}
+.entry-body p{margin:0 0 14px;font-size:14px;color:#CFCABD}
+.entry-body .pull{font-family:var(--serif);font-size:15px;line-height:1.9;color:var(--paper);
+  border-left:2px solid var(--gold);padding:2px 0 2px 14px;margin:0 0 14px}
+
+.shots{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.shot{position:relative;aspect-ratio:1;border-radius:2px;overflow:hidden;background:var(--rock2)}
+.shot img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.shot .who{
+  position:absolute;left:0;right:0;bottom:0;padding:10px 5px 3px;font-size:10px;letter-spacing:.04em;
+  color:#EDE8DC;background:linear-gradient(180deg,transparent,rgba(9,12,16,.8));
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;
+}
+.shot .del{position:absolute;top:3px;right:3px;width:24px;height:24px;border:0;border-radius:2px;
+  background:rgba(15,19,25,.8);color:var(--paper);font-size:14px;line-height:1;cursor:pointer;opacity:0;transition:opacity .15s}
+.shot:hover .del,.shot:focus-within .del{opacity:1}
+@media (hover:none){.shot .del{opacity:.85}}
+.empty{font-size:12.5px;color:#5F6975;margin:0 0 12px}
+
+.drop{display:flex;align-items:center;gap:10px;width:100%;border:1px dashed var(--line);border-radius:3px;
+  background:none;color:var(--muted);padding:12px 14px;font-family:inherit;font-size:13px;cursor:pointer;transition:.18s}
+.drop:hover,.drop.over{border-color:var(--gold);color:var(--gold-lit);background:rgba(201,154,63,.05)}
+.drop .k{font-family:var(--cond);letter-spacing:.1em;font-size:13px}
+
+.tools{display:flex;gap:8px;padding:18px 20px 14px;flex-wrap:wrap}
+.tools button{font-family:var(--sans);font-size:12px;color:var(--muted);background:none;
+  border:1px solid var(--line);border-radius:3px;padding:8px 13px;cursor:pointer;transition:.18s}
+.tools button:hover{border-color:var(--gold);color:var(--gold-lit)}
+.hint{padding:0 20px 18px;font-size:11.5px;color:#66707C;line-height:1.7}
+.hint code{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--gold)}
+
+.leaflet-container{background:#0C1116;font-family:var(--sans)}
+.gsi-dark{filter:invert(1) hue-rotate(178deg) saturate(.55) brightness(.82) contrast(1.05)}
+.pin{background:none;border:0}
+.pin i{display:block;width:100%;height:100%;
+  clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);background:var(--gold)}
+.pin.toki i{background:var(--toki)}
+.pin.pivot i{background:var(--verdigris)}
+.pin.lost i{background:#3A444F;box-shadow:inset 0 0 0 1.5px var(--muted)}
+.pin.guess i{background:rgba(201,154,63,.25);box-shadow:inset 0 0 0 1.5px var(--gold)}
+.pin.sel i{transform:scale(1.55);transition:transform .2s;box-shadow:0 0 14px 3px rgba(235,201,120,.55)}
+.pin b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--cond);
+  font-size:12px;font-weight:600;color:#0F1319;pointer-events:none}
+.pin.lost b,.pin.guess b{color:var(--paper)}
+.pin em{position:absolute;top:-4px;right:-6px;width:8px;height:8px;border-radius:50%;
+  background:var(--gold-lit);box-shadow:0 0 0 2px #0F1319;display:none}
+.pin.has em{display:block}
+
+path.vein{stroke:var(--gold);stroke-opacity:.42;stroke-width:2.5;fill:none;stroke-linecap:round}
+path.glint{stroke:var(--gold-lit);stroke-width:2.5;fill:none;stroke-linecap:round;
+  stroke-dasharray:6 190;animation:flow 9s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-392}}
+path.swap{stroke:var(--verdigris);stroke-opacity:.6;stroke-width:1.6;stroke-dasharray:2 6;fill:none}
+@media (prefers-reduced-motion:reduce){path.glint{animation:none;stroke-dasharray:none;stroke-opacity:.3}}
+
+.legend{position:absolute;left:12px;bottom:22px;z-index:800;background:rgba(18,23,30,.9);
+  border:1px solid var(--line);border-radius:3px;padding:11px 14px;font-size:11.5px;
+  color:var(--muted);line-height:1.9;backdrop-filter:blur(6px)}
+.legend div{display:flex;align-items:center;gap:8px}
+.legend em{width:11px;height:12px;display:block;font-style:normal;
+  clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)}
+.basemap{position:absolute;right:12px;top:12px;z-index:800;display:flex;
+  border:1px solid var(--line);border-radius:3px;overflow:hidden;background:rgba(18,23,30,.9)}
+.basemap button{background:none;border:0;color:var(--muted);font-family:var(--sans);
+  font-size:11.5px;padding:8px 12px;cursor:pointer}
+.basemap button[aria-pressed="true"]{background:rgba(201,154,63,.16);color:var(--gold-lit)}
+
+/* ---------- ログイン画面 ---------- */
+#gate{
+  position:fixed;inset:0;z-index:5000;background:var(--ink);
+  display:none;place-items:center;padding:24px;
+}
+#gate.on{display:grid}
+.gate-card{width:min(380px,100%);text-align:left}
+.gate-card h2{font-family:var(--serif);font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:.06em}
+.gate-card h2 span{background:linear-gradient(100deg,var(--gold) 10%,var(--gold-lit) 45%,var(--gold) 80%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.gate-card .lead{font-size:12.5px;color:var(--muted);margin:0 0 26px;line-height:1.7}
+.gate-card label{display:block;font-family:var(--cond);font-size:12px;letter-spacing:.14em;
+  color:var(--muted);text-transform:uppercase;margin:0 0 6px}
+.gate-card input{
+  width:100%;background:var(--rock);border:1px solid var(--line);border-radius:3px;
+  color:var(--paper);font-family:var(--sans);font-size:16px;padding:12px 13px;margin:0 0 16px;
+}
+.gate-card input:focus{outline:none;border-color:var(--gold)}
+.gate-card .go{
+  width:100%;background:var(--gold);border:0;border-radius:3px;color:#12161C;
+  font-family:var(--sans);font-weight:700;font-size:15px;padding:13px;cursor:pointer;transition:.18s;
+}
+.gate-card .go:hover{background:var(--gold-lit)}
+.gate-card .go:disabled{opacity:.5;cursor:default}
+.gate-err{font-size:12.5px;color:var(--toki);margin:14px 0 0;min-height:18px;line-height:1.6}
+.gate-note{font-size:11.5px;color:#5F6975;margin:26px 0 0;line-height:1.8;border-top:1px solid var(--line);padding-top:16px}
+
+#lightbox{position:fixed;inset:0;z-index:3000;background:rgba(8,11,15,.95);display:none;place-items:center;padding:24px}#lightbox.on{display:grid}
+#lightbox img{max-width:100%;max-height:100%;object-fit:contain}
+#lightbox .x{position:absolute;top:calc(14px + env(safe-area-inset-top));right:20px;
+  background:none;border:0;color:var(--paper);font-size:28px;cursor:pointer}
+#lightbox .cap{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom));left:0;right:0;
+  text-align:center;font-size:12px;color:var(--muted)}
+
+.toast{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));
+  transform:translateX(-50%) translateY(16px);background:var(--rock2);border:1px solid var(--line);
+  color:var(--paper);padding:11px 18px;border-radius:3px;font-size:13px;z-index:4000;
+  opacity:0;pointer-events:none;transition:.25s;max-width:82vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:860px){
+  main{flex-direction:column;height:calc(100dvh - 122px)}
+  #map{flex:0 0 44%;order:1}
+  #panel{width:auto;flex:1 1 auto;order:2;border-right:0;border-top:1px solid var(--line)}
+  .entry-body{padding-left:20px}
+  .legend{display:none}
+  .shots{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="masthead">
+    <h1><span class="gild">佐渡島・黄金ルート紀行</span></h1>
+    <span class="dek">Sado &middot; 3 nights, 4 days</span>
+  </div>
+  <p class="tag">
+    ピンを開くと、その場所の話と写真が出ます。
+    <span id="mode">読み込み中…</span>
+  </p>
+  <nav id="days" role="tablist" aria-label="日程"></nav>
+</header>
+
+<main>
+  <div id="panel"></div>
+  <div id="map">
+    <div class="basemap">
+      <button type="button" data-base="dark" aria-pressed="true">地図</button>
+      <button type="button" data-base="photo" aria-pressed="false">航空写真</button>
+    </div>
+    <div class="legend">
+      <div><em style="background:#C99A3F"></em>予定どおり訪れた場所</div>
+      <div><em style="background:#E8A0A8"></em>トキに会えた場所</div>
+      <div><em style="background:#6F9E8B"></em>予定変更でたどり着いた場所</div>
+      <div><em style="box-shadow:inset 0 0 0 1.5px #8B95A1"></em>断念・空振りに終わった場所</div>
+    </div>
+  </div>
+</main>
+
+<div id="gate">
+  <div class="gate-card">
+    <h2><span>佐渡島・黄金ルート紀行</span></h2>
+    <p class="lead">二人だけのアルバムです。ログインしてください。</p>
+    <label for="g-mail">メールアドレス</label>
+    <input id="g-mail" type="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false">
+    <label for="g-pass">パスワード</label>
+    <input id="g-pass" type="password" autocomplete="current-password">
+    <button class="go" type="button" id="g-go">開く</button>
+    <p class="gate-err" id="g-err"></p>
+    <p class="gate-note">パスワードを忘れた場合は、もう一人に聞いてください。写真は非公開の保管庫に入っていて、ログインした人だけが見られます。</p>
+  </div>
+</div>
+
+<div id="lightbox">
+  <button class="x" type="button" aria-label="閉じる">&times;</button>
+  <img alt=""><div class="cap"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   ★ここだけ書き換えてください★  Supabase の設定
+
+   1. https://supabase.com で新規プロジェクトを作成
+   2. SQL Editor で setup.sql の中身を実行（バケットと権限を作ります）
+   3. Project Settings → API Keys の 2つを下にコピー
+
+   ここが空のままだと「この端末のみ」モードで動きます（共有はされません）。
+   ═══════════════════════════════════════════════════════════════════════ */
+const CONFIG = {
+  supabaseUrl: "https://yktjxyfzuckrtiaixoqj.supabase.co/rest/v1/",        // 例: "https://abcdefghijkl.supabase.co"
+  anonKey:     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlrdGp4eWZ6dWNrcnRpYWl4b3FqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwNDgyOTUsImV4cCI6MjEwMzYyNDI5NX0.r8usL-IyVRqqJ0rpyT03A2Ek-Govn0a5LlVGOCed44Y",        // 例: "sb_publishable_..." または "eyJhbGciOi..."
+  bucket:      "sado-photos",
+
+  // ログイン用メールアドレスと、写真に添える表示名の対応
+  people: {
+    "kjn1q89@gmail.com":  "洸潤",
+    "yukiko.ns.us@gmail.com": "由紀子"
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   1. 旅の記録
+   ═══════════════════════════════════════════════════════════════════════ */
+const DAYS = [
+  {id:"d0", date:"8.8",  label:"越後路",  title:"プロローグ｜記録的豪雨と涙の決断", sub:"8月8日 金"},
+  {id:"d1", date:"8.9",  label:"相川",    title:"第1章｜宇治金太郎さんの涙と、相川の絶景", sub:"8月9日 土"},
+  {id:"d2", date:"8.10", label:"南佐渡",  title:"第2章｜幻のトキと、サギ事件。そして運命のディナー", sub:"8月10日 日"},
+  {id:"d3", date:"8.11", label:"帰路",    title:"エピローグ｜リベンジと、最高のボーナスタイム", sub:"8月11日 月"}
+];
+
+const SPOTS = [
+  {id:"kiyotsu", day:"d0", n:1, kind:"plan", name:"清津峡渓谷トンネル", sub:"TOKAMACHI", ll:[36.9725486,138.7499481],
+   pull:"トンネルの奥に広がる水鏡の絶景は息を呑む美しさで、旅の滑り出しとしては完璧だった。",
+   body:"新幹線で越後湯沢へ降り立ち、ライトアップアートを速攻で楽しむ。ここまでは、すべて計画どおりだった。"},
+  {id:"ojiya", day:"d0", n:2, kind:"lost", name:"カフェ「カルチョフィ」", sub:"OJIYA — 断念", ll:[37.3096392,138.8135304],
+   pull:"「1時間に100ミリを超える記録的豪雨のため、運転を見合わせます」",
+   body:"痛恨の電車乗り間違いをリカバリーした矢先、目的地の2駅手前で電車が急停車。タクシーを飛ばせば行けたが、それではフェリーに間に合わない。涙を呑んで断念した。──この小千谷が、二日後にとんでもない形で戻ってくる。"},
+  {id:"katsura1", day:"d0", n:3, kind:"plan", name:"ホテル ニュー桂", sub:"RYOTSU — 22:00 着", ll:[38.065599,138.440973],
+   pull:"隣には蔦がビッシリと絡まった異様な雰囲気の廃ホテルがそびえ立っており、一瞬ビビった。",
+   body:"なんとか夜22時、予定どおり佐渡島に到着。ニュー桂のスタッフさんたちは温かく、長旅の疲れと豪雨のストレスを優しく癒やしてくれた。ここが3泊の拠点になる。"},
+
+  {id:"tokimori", day:"d1", n:1, kind:"toki", name:"トキの森公園", sub:"11:00 — ゆっくり到着", ll:[38.0371289,138.4208646],
+   pull:"「自分は世界一の裏切り者だ」",
+   body:"「朝イチの開園ダッシュ」と息巻いていたのに、前日の疲れでゆったり11時着。これが正解だった。生後4ヶ月の幼いトキがすぐ近くまで来てくれる。<br><br>展示室はボランティアのおじいさんに1時間かけて案内してもらった。最後の野生トキ「キン」と、キンを保護し続けた宇治金太郎さん。警戒させないよう細心の配慮で寄り添い続けたのに、最後は種の保存のために捕獲せざるを得なかった。その葛藤の言葉に、何も言えなくなった。"},
+  {id:"kitazawa_day", day:"d1", n:2, kind:"plan", name:"北沢浮遊選鉱場跡（昼）", sub:"AIKAWA", ll:[38.0365825,138.2416735],
+   pull:"巨大な遺構を、まず見上げる。",
+   body:"午後の相川エリアはここから。東洋一とうたわれた選鉱場のコンクリートが、蔦にのまれたまま残っている。"},
+  {id:"kinzan", day:"d1", n:3, kind:"plan", name:"史跡 佐渡金山", sub:"下相川", ll:[38.0416936,138.2560014],
+   pull:"「なんでこんなに涼しいんですか？」「分かりません」",
+   body:"坑道の入り口に立つと、信じられないほどのひんやりとした冷気。不思議に思って尋ねたスタッフさんの、まさかの塩対応。思わず笑ってしまった。"},
+  {id:"benkei", day:"d1", n:4, kind:"plan", name:"弁慶のはさみ岩", sub:"吹上海岸", ll:[38.045394,138.236956],
+   pull:"まるでグランドキャニオンの一角を切り取ったかのような圧巻の迫力。",
+   body:"佐渡弁慶が投げ飛ばした岩が、巨岩と巨岩の間にすっぽり挟まったという伝説の奇観。"},
+  {id:"nanaura", day:"d1", n:5, kind:"plan", name:"七浦海岸・夫婦岩", sub:"夕暮れドライブ", ll:[37.9977059,138.234219],
+   pull:"夕暮れ時は、西海岸へ。",
+   body:"相川から南へ下る海沿いの道。夕方の光のなかを、ただ走った。"},
+  {id:"kitazawa_night", day:"d1", n:6, kind:"plan", name:"北沢浮遊選鉱場跡（ライトアップ）", sub:"NIGHT", ll:[38.0359,138.2427],
+   pull:"闇夜に浮かび上がる、不思議で幻想的な光景に魅了された。",
+   body:"すっかり日の落ちた後、昼に見上げた同じ場所へ戻る。色を変えながら光る遺構は、昼とはまったく別のものだった。"},
+  {id:"henjin", day:"d1", n:7, kind:"pivot", name:"de Vinco へんじんもっこ", sub:"予定を変更して — 夜", ll:[38.023288,138.431187],
+   pull:"本場の絶品ソーセージとビールで、大充実の1日を最高の形で締めくくった。",
+   body:"当初はランチの候補だった店へ、夜に予定変更して駆け込む。結果的に、これが大正解だった。"},
+
+  {id:"koryu", day:"d2", n:1, kind:"toki", name:"トキ交流会館 周辺", sub:"04:30 起床", ll:[38.0355117,138.4463684],
+   pull:"いた！！4〜5羽の野生のトキが、悠々と空を飛んでいる。",
+   body:"野生のトキを見るため夫婦で朝4時半に起床、車を走らせた。朝の澄んだ空気のなか、白い翼が朱をふくんで光る。朝から感動に包まれた。"},
+  {id:"sagi", day:"d2", n:2, kind:"lost", state:"空振り", name:"通称「サギ事件」の水辺", sub:"教わった秘密の水辺", ll:[37.9724167,138.4148333],
+   pull:"……全部、サギだった。",
+   body:"ホテルのおばさまに教わった「秘密の場所」。車で30分、由紀子が窓から水辺を発見。何十羽もの白い鳥の群れに「大群だ！」と興奮してファインダーを覗き、絶句した。トキはただの1羽もいない。見事なまでのサギ（鷺）の群れである。<br><br>後で聞くと、単に到着した時間帯が少し遅かっただけらしい。見事なサギ（詐欺）事件として、夫婦の笑い話になった。<br><br><span style='color:#8B95A1'>ちなみにこの水辺から長谷寺までは、直線で約550m。ウサギ観音は目と鼻の先だった。</span>"},
+  {id:"chokokuji", day:"d2", n:3, kind:"plan", name:"長谷寺（ちょうこくじ）", sub:"ウサギ観音", ll:[37.9764742,138.4184184],
+   pull:"歴史の重みが、そのままそこに放置されているような生々しさ。",
+   body:"出迎えたのは巨大でなんとも不気味なウサギ観音。しかし奥へ進むと鎌倉時代の本殿、平安時代の金剛力士像。綺麗に整備され尽くしていない、独特の味わいがあるお寺だった。"},
+  {id:"koisuru", day:"d2", n:4, kind:"plan", name:"恋するバス停（背合）", sub:"真野湾", ll:[37.9457167,138.3212299],
+   pull:"海に向かって、バス停だけがぽつんと立っている。",
+   body:"一度ホテルへ戻って一休みしてから立ち寄った。ここから、由紀子考案の絶景タイムラインがスタート……するはずだった。"},
+  {id:"nagahama_x", day:"d2", n:5, kind:"lost", name:"長浜荘（海鮮丼）", sub:"12:00 — 品切れ", ll:[37.9417806,138.3101167],
+   pull:"「品切れ・営業終了」の、無情な看板。",
+   body:"海鮮丼を目当てに意気揚々と到着したものの、まさかの終了。想定外の事態だった。──が、この悔しさが最終日に効いてくる。"},
+  {id:"shimafumi", day:"d2", n:6, kind:"pivot", name:"しまふうみ", sub:"すかさず変更", ll:[37.9399575,138.3073971],
+   pull:"最高のオーシャンビューを眺めながら、絶品のボンゴレ。",
+   body:"長浜荘から車で1分。プランBに切り替えた結果、これはこれで大正解だった。"},
+  {id:"yajima_x", day:"d2", n:7, kind:"lost", name:"矢島体験交流館", sub:"満席 — 断念", ll:[37.8087863,138.266857],
+   pull:"お目当てのたらい舟は、まさかの満席。",
+   body:"本日2度目のプランB発動。ここでも柔軟に切り替えて、宿根木へ向かう。"},
+  {id:"shukunegi", day:"d2", n:8, kind:"pivot", name:"宿根木 たらい舟", sub:"プランB", ll:[37.8058498,138.2421793],
+   pull:"「今日はもう20人も乗せたよ」",
+   body:"灼熱の太陽の下、気のいいおじちゃんが笑いながら漕いでくれた。昔は一家に一台たらい船があり、ワカメなどの藻を採って生計の足しにしていたという。<br><br>その後の古い町並みの散策で、気品のある可愛い猫がゴロゴロ寝転がっていた。そこへ偶然、猫を愛でる女性二人組が通りかかる。他には誰もいない静かな時間帯。絶好のロケーションだったので、写真を撮ってもらった。──この一枚が、夜につながる。"},
+  {id:"manjojiki", day:"d2", n:9, kind:"plan", name:"万畳敷", sub:"夕焼け待ち", ll:[37.8339492,138.2146124],
+   pull:"空と海が溶け合うような夕景は、言葉を失うほど美しかった。",
+   body:"期待していたウユニ塩湖のような完全な水鏡にはならなかった。それでも、待った時間はまったく惜しくなかった。"},
+  {id:"kosado", day:"d2", n:10, kind:"pivot", name:"Restaurant & Bar こさど", sub:"運命のディナー", ll:[37.967681,138.3462793],
+   pull:"聞けば、一人はなんと「小千谷」で小学生に教える仕事をしているという。",
+   body:"佐渡牛ととんかつを注文して待っていると、隣のテーブルに座ったのは、宿根木で写真を撮ってくれたあの女性二人組だった。運ばれてきた我々の肉料理を見て迷った末、彼女たちも同じメニューを選び、すっかり意気投合。<br><br>お二人は長岡の高校の同級生。一人は吉祥寺で介護の仕事を、そしてもう一人は──初日の豪雨で行くことを断念した、あの小千谷で。不思議な縁に盛り上がり、最後には4人でLINEグループまで出来上がっていた。旅のハプニングが、最高の出会いを生んだ夜。"},
+
+  {id:"station", day:"d3", n:1, kind:"lost", state:"空振り", name:"野生復帰ステーション観察棟", sub:"04:30 — リベンジならず", ll:[38.0190504,138.4531235],
+   pull:"この日は、見つけることができなかった。",
+   body:"野生のトキをもう一度目に焼き付けたくて、またしても朝4時半に起床。観察棟から、近くの田んぼも探し回ったけれど。"},
+  {id:"nagahama_o", day:"d3", n:2, kind:"pivot", name:"長浜荘（リベンジ）", sub:"雪辱のランチ", ll:[37.9424,138.3095],
+   pull:"東京はもちろん、他の土地でもなかなかお目にかかれない圧倒的なクオリティ。",
+   body:"昨日品切れで涙を呑んだ場所へ、チェックアウト後にまっすぐ向かう。運ばれてきた極上海鮮丼は、カニや新鮮な魚介がこれでもかとふんだんに盛られていた。"},
+  {id:"fureai", day:"d3", n:3, kind:"toki", name:"トキふれあいプラザ", sub:"旅の神様からの贈り物", ll:[38.0364,138.4216],
+   pull:"親のトキ2羽が、何度も我々の近くまで飛んできてくれた。",
+   body:"港へ向かう前、最後にどうしても立ち寄りたかった場所。ガラス越しとはいえ至近距離でのボーナスタイム連発に、夢中でシャッターを切り続けた。"},
+  {id:"ameya", day:"d3", n:4, kind:"plan", name:"あめやの桟橋（なんもな橋）", sub:"最後の寄り道", ll:[37.999056,138.3185041],
+   pull:"ノスタルジックな風景を、ちらっと目に焼き付ける。",
+   body:"通称「なんもな橋」。フェリー乗り場へ向かう道すがら、車を停めて。"},
+  {id:"port", day:"d3", n:5, kind:"plan", name:"両津港", sub:"出港", ll:[38.0784,138.4396],
+   pull:"サンキューSADO !!! また来ます。",
+   body:"豪雨の足止めから始まり、予定変更の連続、謎のサギの大群、そして小千谷が結んだ不思議な縁。完璧なスケジュールのおかげで無駄なく動きつつも、旅ならではのイレギュラーがこれでもかとスパイスを効かせてくれた、濃密すぎる3泊4日だった。"}
+];
+
+const SWAPS = [["nagahama_x","shimafumi"],["yajima_x","shukunegi"],["nagahama_x","nagahama_o"]];
+const STATE_LABEL = {plan:"", toki:"トキ", pivot:"予定変更", lost:"断念", guess:"推定"};
+const VALID = new Set(SPOTS.map(s => s.id));
+
+/* ═══════════════════════════════════════════════════════════════════════
+   2. 写真の保管
+   ═══════════════════════════════════════════════════════════════════════ */
+const CLOUD = !!(CONFIG.supabaseUrl && CONFIG.anonKey);
+const SB = {
+  url: (CONFIG.supabaseUrl || "").replace(/\/+$/,""),
+  key: CONFIG.anonKey,
+  bucket: CONFIG.bucket || "sado-photos"
+};
+const auth = () => ({apikey: SB.key, Authorization: "Bearer " + (Auth.token() || SB.key)});
+
+/* 期限切れなら一度だけ更新して再試行する */
+async function api(url, opts){
+  let r = await fetch(url, {...opts, headers:{...auth(), ...(opts.headers||{})}});
+  if(r.status === 401 || r.status === 403){
+    if(await Auth.renew()){
+      r = await fetch(url, {...opts, headers:{...auth(), ...(opts.headers||{})}});
+    }
+  }
+  return r;
+}
+
+/* 撮影者の名前。ファイル名に埋め込むのでUTF-8をbase64urlに */
+const b64  = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)))
+                  .replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const unb64 = s => { try{
+    const t = s.replace(/-/g,"+").replace(/_/g,"/");
+    return new TextDecoder().decode(Uint8Array.from(atob(t), c => c.charCodeAt(0)));
+  }catch(e){ return ""; } };
+
+const Me = (() => {
+  let override = "";
+  try { override = localStorage.getItem("sado-who") || ""; } catch(e){}
+  return {
+    get(){
+      if(override) return override;
+      const mail = Auth.email();
+      if(!mail) return "";
+      return (CONFIG.people && CONFIG.people[mail]) || mail.split("@")[0];
+    },
+    ask(){
+      const v = prompt("写真に添える表示名", this.get() || "");
+      if(v !== null){ override = v.trim().slice(0,20); try{ localStorage.setItem("sado-who", override); }catch(e){} }
+      return this.get();
+    }
+  };
+})();
+
+/* --- ログイン（Supabase Auth）--- */
+const Auth = (() => {
+  const KEY = "sado-session";
+  let access = "", refresh = "", email = "";
+  try{
+    const j = JSON.parse(localStorage.getItem(KEY) || "{}");
+    refresh = j.refresh || ""; email = j.email || "";
+  }catch(e){}
+  const save = () => { try{ localStorage.setItem(KEY, JSON.stringify({refresh, email})); }catch(e){} };
+
+  async function grant(body){
+    const r = await fetch(`${SB.url}/auth/v1/token?grant_type=${body.grant}`, {
+      method:"POST",
+      headers:{apikey:SB.key, "Content-Type":"application/json"},
+      body: JSON.stringify(body.payload)
+    });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(j.error_description || j.msg || j.message || `HTTP ${r.status}`);
+    access = j.access_token || "";
+    refresh = j.refresh_token || "";
+    email = (j.user && j.user.email) || email;
+    save();
+    return true;
+  }
+  return {
+    signIn: (em, pw) => grant({grant:"password", payload:{email:em, password:pw}}),
+    renew(){
+      if(!refresh) return Promise.resolve(false);
+      return grant({grant:"refresh_token", payload:{refresh_token:refresh}})
+        .catch(() => { access = ""; refresh = ""; save(); return false; });
+    },
+    out(){ access = ""; refresh = ""; email = ""; try{ localStorage.removeItem(KEY); }catch(e){} },
+    token: () => access,
+    email: () => email,
+    hasSession: () => !!refresh,
+    signedIn: () => !!access
+  };
+})();
+
+/* --- 端末内保管（IndexedDB）--- */
+const Local = (() => {
+  let db = null, mem = {}, ok = false;
+  function open(){
+    return new Promise(res => {
+      let req; try { req = indexedDB.open("sado-koudou-kikou", 1); } catch(e){ return res(false); }
+      req.onupgradeneeded = e => {
+        const d = e.target.result;
+        if(!d.objectStoreNames.contains("photos")) d.createObjectStore("photos", {keyPath:"id"});
+      };
+      req.onsuccess = e => { db = e.target.result; ok = true; res(true); };
+      req.onerror = () => res(false);
+      setTimeout(() => res(ok), 2500);
+    });
+  }
+  const tx = m => db.transaction("photos", m).objectStore("photos");
+  async function get(id){
+    if(!db) return mem[id] || [];
+    return new Promise(res => {
+      const r = tx("readonly").get(id);
+      r.onsuccess = () => res(r.result ? r.result.items : []);
+      r.onerror = () => res([]);
+    });
+  }
+  async function set(id, items){
+    mem[id] = items;
+    if(!db) return false;
+    return new Promise(res => {
+      const r = tx("readwrite").put({id, items});
+      r.onsuccess = () => res(true); r.onerror = () => res(false);
+    });
+  }
+  return {open, get, set, ready:() => ok};
+})();
+
+/* --- 共有アルバム（Supabase Storage）--- */
+const Cloud = (() => {
+  let index = {};
+
+  /* 非公開バケットなので、表示のたびに期限付きURLを発行する */
+  async function sign(keys){
+    const out = {};
+    for(let i = 0; i < keys.length; i += 100){
+      const batch = keys.slice(i, i + 100);
+      const r = await api(`${SB.url}/storage/v1/object/sign/${SB.bucket}`, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({expiresIn: 60*60*8, paths: batch})
+      });
+      if(!r.ok) continue;
+      const rows = await r.json().catch(() => []);
+      (Array.isArray(rows) ? rows : []).forEach(x => {
+        const u = x.signedURL || x.signedUrl;
+        if(u) out[x.path] = SB.url + "/storage/v1" + (u.startsWith("/") ? u : "/" + u);
+      });
+    }
+    return out;
+  }
+
+  async function refresh(){
+    const r = await api(`${SB.url}/storage/v1/object/list/${SB.bucket}`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({prefix:"", limit:1000, sortBy:{column:"name", order:"asc"}})
+    });
+    if(!r.ok) throw new Error("list " + r.status + " " + (await r.text()).slice(0,200));
+    const rows = await r.json();
+    const idx = {}, keys = [];
+    (Array.isArray(rows) ? rows : []).forEach(o => {
+      if(!o || !o.name) return;
+      const parts = o.name.split("__");
+      if(parts.length < 4) return;
+      const [spot, ts, who] = parts;
+      if(!VALID.has(spot)) return;
+      keys.push(o.name);
+      (idx[spot] = idx[spot] || []).push({key:o.name, src:"", who:unb64(who), ts:+ts||0});
+    });
+    const urls = await sign(keys);
+    Object.values(idx).forEach(a => {
+      a.forEach(p => p.src = urls[p.key] || "");
+      a.sort((x,y) => x.ts - y.ts);
+    });
+    index = idx;
+    return idx;
+  }
+
+  function get(id){ return index[id] || []; }
+
+  async function put(spotId, blob, who){
+    const key = `${spotId}__${Date.now()}__${b64(who||"")}__${Math.random().toString(36).slice(2,8)}.jpg`;
+    const r = await api(`${SB.url}/storage/v1/object/${SB.bucket}/${encodeURIComponent(key)}`, {
+      method:"POST", headers:{"Content-Type":"image/jpeg"}, body: blob
+    });
+    if(!r.ok) throw new Error("upload " + r.status + " " + (await r.text()).slice(0,200));
+    const urls = await sign([key]);
+    const item = {key, src:urls[key] || "", who:who||"", ts:Date.now()};
+    (index[spotId] = index[spotId] || []).push(item);
+    return item;
+  }
+
+  async function drop(spotId, key){
+    const r = await api(`${SB.url}/storage/v1/object/${SB.bucket}/${encodeURIComponent(key)}`, {method:"DELETE"});
+    if(!r.ok) throw new Error("delete " + r.status);
+    index[spotId] = (index[spotId] || []).filter(x => x.key !== key);
+  }
+
+  function clear(){ index = {}; }
+
+  return {refresh, get, put, drop, clear, all:() => index};
+})();
+
+/* 長辺1600pxまで縮小してJPEG化。iPhoneのHEICもここで変換されます */
+function shrink(file){
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1600;
+        let {width:w, height:h} = img;
+        if(!w || !h) return rej(new Error("no size"));
+        if(Math.max(w,h) > MAX){ const k = MAX/Math.max(w,h); w = Math.round(w*k); h = Math.round(h*k); }
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        res(c);
+      };
+      img.onerror = () => rej(new Error("decode"));
+      img.src = fr.result;
+    };
+    fr.onerror = rej;
+    fr.readAsDataURL(file);
+  });
+}
+const toBlob = c => new Promise(r => c.toBlob(r, "image/jpeg", 0.82));
+
+/* ═══════════════════════════════════════════════════════════════════════
+   3. 地図
+   ═══════════════════════════════════════════════════════════════════════ */
+const map = L.map("map", {zoomControl:false, minZoom:8, maxZoom:17, tap:false});
+L.control.zoom({position:"topleft"}).addTo(map);
+map.attributionControl.setPrefix("");
+
+const BASES = {
+  dark: L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png",
+    {maxZoom:17, className:"gsi-dark", attribution:"地理院タイル（淡色）"}),
+  photo: L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg",
+    {maxZoom:17, attribution:"地理院タイル（シームレス空中写真）"})
+};
+let baseNow = "dark";
+BASES.dark.addTo(map);
+document.querySelectorAll(".basemap button").forEach(b => b.addEventListener("click", () => {
+  const k = b.dataset.base;
+  if(k === baseNow) return;
+  map.removeLayer(BASES[baseNow]); BASES[k].addTo(map).bringToBack(); baseNow = k;
+  document.querySelectorAll(".basemap button").forEach(x => x.setAttribute("aria-pressed", x === b));
+}));
+
+const layer = L.layerGroup().addTo(map);
+const markers = {};
+let current = null, dayNow = "";
+
+function shots(id){ return CLOUD ? Cloud.get(id) : (localCache[id] || []); }
+let localCache = {};
+
+function pinIcon(s, sel){
+  const size = (s.kind === "lost" || s.kind === "guess") ? 20 : 26;
+  const has = shots(s.id).length ? " has" : "";
+  return L.divIcon({
+    className: "pin " + s.kind + has + (sel ? " sel" : ""),
+    html: `<i></i><b>${s.n}</b><em></em>`,
+    iconSize:[size,size], iconAnchor:[size/2,size/2]
+  });
+}
+
+function draw(dayId){
+  layer.clearLayers();
+  const list = SPOTS.filter(s => !dayId || s.day === dayId);
+  DAYS.forEach(d => {
+    if(dayId && d.id !== dayId) return;
+    const seq = SPOTS.filter(s => s.day === d.id && s.kind !== "lost" && s.kind !== "guess").map(s => s.ll);
+    if(seq.length > 1){
+      L.polyline(seq, {className:"vein", interactive:false}).addTo(layer);
+      L.polyline(seq, {className:"glint", interactive:false}).addTo(layer);
+    }
+  });
+  SWAPS.forEach(([a,b]) => {
+    const A = SPOTS.find(s => s.id === a), B = SPOTS.find(s => s.id === b);
+    if(!A || !B) return;
+    if(dayId && A.day !== dayId && B.day !== dayId) return;
+    L.polyline([A.ll, B.ll], {className:"swap", interactive:false}).addTo(layer);
+  });
+  Object.keys(markers).forEach(k => delete markers[k]);
+  list.forEach(s => {
+    const m = L.marker(s.ll, {icon:pinIcon(s,false), title:s.name, riseOnHover:true}).addTo(layer);
+    m.on("click", () => select(s.id, true));
+    markers[s.id] = m;
+  });
+  if(list.length) map.fitBounds(L.latLngBounds(list.map(s => s.ll)), {padding:[50,50], maxZoom:13});
+}
+function refreshPins(){
+  Object.entries(markers).forEach(([id,m]) => m.setIcon(pinIcon(SPOTS.find(x => x.id === id), id === current)));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   4. パネル
+   ═══════════════════════════════════════════════════════════════════════ */
+const panel = document.getElementById("panel");
+const nav = document.getElementById("days");
+
+function tabs(){
+  const mk = (id,d,l) => `<button role="tab" data-day="${id}" aria-selected="${id===dayNow}"><span class="d">${d}</span>${l}</button>`;
+  nav.innerHTML = mk("","ALL","全行程") + DAYS.map(d => mk(d.id,d.date,d.label)).join("");
+  nav.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    dayNow = b.dataset.day; tabs(); render(); draw(dayNow || null);
+  }));
+}
+
+function card(s){
+  const st = s.state || STATE_LABEL[s.kind];
+  const cls = s.kind === "lost" ? "lost" : s.kind === "pivot" ? "pivot" : "plan";
+  const n = shots(s.id).length;
+  return `
+  <article class="entry" id="e-${s.id}" data-id="${s.id}">
+    <button class="entry-head" type="button" aria-expanded="false">
+      <span class="glyph ${s.kind}"><i></i><b>${s.n}</b></span>
+      <span>
+        <span class="entry-name">${s.name}${n ? `<span class="count">${n}枚</span>` : ""}</span>
+        <span class="entry-sub">${s.sub}</span>
+      </span>
+      ${st ? `<span class="state ${cls}">${st}</span>` : "<span></span>"}
+    </button>
+    <div class="entry-body">
+      <p class="pull">${s.pull}</p>
+      <p>${s.body}</p>
+      <div class="shots" data-shots="${s.id}"></div>
+      <button class="drop" type="button" data-add="${s.id}">
+        <span class="k">＋</span> 写真を追加${CLOUD ? "（二人の共有アルバム）" : ""}
+      </button>
+    </div>
+  </article>`;
+}
+
+function render(){
+  const groups = DAYS.filter(d => !dayNow || d.id === dayNow);
+  panel.innerHTML = groups.map(d => `
+    <div class="chapter">${d.title}<small>${d.sub}</small></div>
+    ${SPOTS.filter(s => s.day === d.id).map(card).join("")}
+  `).join("") + (CLOUD ? `
+    <div class="tools">
+      <button type="button" id="sync">最新の写真を読み込む</button>
+      <button type="button" id="rename">表示名を変える</button>
+      <button type="button" id="migrate">端末内の写真を共有へ移す</button>
+    </div>
+    <p class="hint">写真は非公開の保管庫にあり、ログインした二人だけが見られます。表示用のURLは8時間で失効するため、リンクが流出しても中身は開けません。</p>`
+  : `
+    <div class="tools">
+      <button type="button" id="exp">写真をバックアップ</button>
+      <button type="button" id="imp">バックアップから復元</button>
+    </div>
+    <p class="hint">共有設定がまだのため、写真はこの端末のブラウザ内にだけ保存されます。ファイル冒頭の <code>CONFIG</code> に Supabase の URL とキーを入れると共有モードになります。</p>`);
+
+  panel.querySelectorAll(".entry-head").forEach(h =>
+    h.addEventListener("click", () => select(h.parentElement.dataset.id, false)));
+  panel.querySelectorAll("[data-add]").forEach(b => {
+    b.addEventListener("click", () => pick(b.dataset.add));
+    b.addEventListener("dragover", e => {e.preventDefault(); b.classList.add("over")});
+    b.addEventListener("dragleave", () => b.classList.remove("over"));
+    b.addEventListener("drop", e => {
+      e.preventDefault(); b.classList.remove("over");
+      add(b.dataset.add, [...e.dataTransfer.files].filter(f => f.type.startsWith("image/")));
+    });
+  });
+
+  if(CLOUD){
+    document.getElementById("sync").addEventListener("click", sync);
+    document.getElementById("rename").addEventListener("click", () => { Me.ask(); stamp(); toast("表示名を更新しました"); });
+    document.getElementById("migrate").addEventListener("click", migrate);
+  } else {
+    document.getElementById("exp").addEventListener("click", exportAll);
+    document.getElementById("imp").addEventListener("click", importAll);
+  }
+
+  SPOTS.filter(s => !dayNow || s.day === dayNow).forEach(s => paint(s.id));
+  if(current) markOpen(current);
+}
+
+function markOpen(id){
+  panel.querySelectorAll(".entry").forEach(e => {
+    const on = e.dataset.id === id;
+    e.classList.toggle("is-open", on);
+    e.querySelector(".entry-head").setAttribute("aria-expanded", on);
+  });
+}
+
+function select(id, fromMap){
+  const s = SPOTS.find(x => x.id === id);
+  if(!s) return;
+  if(current === id && !fromMap){ current = null; markOpen(null); refreshPins(); return; }
+  current = id; markOpen(id); refreshPins();
+  map.panTo(s.ll, {animate:true, duration:.5});
+  const el = document.getElementById("e-" + id);
+  if(el && fromMap) el.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+/* ---------- 写真 ---------- */
+let pending = null;
+const fileInput = Object.assign(document.createElement("input"), {type:"file", accept:"image/*", multiple:true});
+fileInput.style.display = "none";
+document.body.appendChild(fileInput);
+fileInput.addEventListener("change", () => {
+  if(pending) add(pending, [...fileInput.files]);
+  fileInput.value = "";
+});
+function pick(id){
+  if(CLOUD && !Auth.signedIn()){ showGate("写真を追加するにはログインしてください"); return; }
+  pending = id; fileInput.click();
+}
+
+async function add(id, files){
+  if(!files.length) return;
+  toast(`${files.length}枚を処理中…`);
+  let done = 0, failed = 0;
+  for(const f of files){
+    try{
+      const canvas = await shrink(f);
+      if(CLOUD){
+        await Cloud.put(id, await toBlob(canvas), Me.get());
+      }else{
+        const list = await Local.get(id);
+        list.push({src: canvas.toDataURL("image/jpeg", .82), who: Me.get(), ts: Date.now()});
+        await Local.set(id, list);
+        localCache[id] = list;
+      }
+      done++;
+    }catch(e){ failed++; console.warn(e); }
+  }
+  paint(id); repaintCounts(); refreshPins();
+  toast(failed ? `${done}枚を追加（${failed}枚は失敗）` : `${done}枚を追加しました`);
+}
+
+function paint(id){
+  const box = panel.querySelector(`[data-shots="${id}"]`);
+  if(!box) return;
+  const items = shots(id);
+  if(!items.length){
+    box.innerHTML = `<p class="empty">まだ写真がありません。</p>`;
+    return;
+  }
+  box.innerHTML = items.map((p,i) => `
+    <figure class="shot">
+      <img src="${p.src}" alt="" loading="lazy" data-i="${i}">
+      ${p.who ? `<figcaption class="who">${p.who}</figcaption>` : ""}
+      <button class="del" type="button" data-i="${i}" aria-label="この写真を削除">&times;</button>
+    </figure>`).join("");
+  box.querySelectorAll("img[data-i]").forEach(img =>
+    img.addEventListener("click", () => zoom(items[+img.dataset.i])));
+  box.querySelectorAll(".del").forEach(b =>
+    b.addEventListener("click", async e => {
+      e.stopPropagation();
+      if(!confirm("この写真を削除しますか？")) return;
+      const i = +b.dataset.i;
+      try{
+        if(CLOUD){ await Cloud.drop(id, items[i].key); }
+        else{
+          const list = await Local.get(id);
+          list.splice(i,1); await Local.set(id, list); localCache[id] = list;
+        }
+        paint(id); repaintCounts(); refreshPins();
+        toast("削除しました");
+      }catch(err){ toast("削除できませんでした"); }
+    }));
+}
+
+function repaintCounts(){
+  panel.querySelectorAll(".entry").forEach(e => {
+    const s = SPOTS.find(x => x.id === e.dataset.id);
+    const n = shots(s.id).length;
+    const nameEl = e.querySelector(".entry-name");
+    nameEl.innerHTML = s.name + (n ? `<span class="count">${n}枚</span>` : "");
+  });
+}
+
+/* ---------- 同期・移行 ---------- */
+async function sync(){
+  if(!Auth.signedIn()) return;
+  try{
+    toast("読み込み中…");
+    await Cloud.refresh();
+    SPOTS.forEach(s => paint(s.id));
+    repaintCounts(); refreshPins(); stamp();
+    toast(`共有アルバム：${Object.values(Cloud.all()).reduce((a,b) => a + b.length, 0)}枚`);
+  }catch(e){
+    toast("読み込めませんでした");
+    console.error(e);
+  }
+}
+
+async function migrate(){
+  let moved = 0;
+  for(const s of SPOTS){
+    const items = await Local.get(s.id);
+    if(!items.length) continue;
+    for(const p of items){
+      try{
+        const blob = await (await fetch(p.src)).blob();
+        await Cloud.put(s.id, blob, p.who || Me.get());
+        moved++;
+      }catch(e){ console.warn(e); }
+    }
+    await Local.set(s.id, []);
+  }
+  localCache = {};
+  SPOTS.forEach(s => paint(s.id)); repaintCounts(); refreshPins();
+  toast(moved ? `${moved}枚を共有アルバムへ移しました` : "移す写真はありませんでした");
+}
+
+/* ---------- ライトボックス ---------- */
+const lb = document.getElementById("lightbox");
+function zoom(p){
+  lb.querySelector("img").src = p.src;
+  lb.querySelector(".cap").textContent = p.who ? "photo by " + p.who : "";
+  lb.classList.add("on");
+}
+lb.addEventListener("click", () => lb.classList.remove("on"));
+document.addEventListener("keydown", e => { if(e.key === "Escape") lb.classList.remove("on"); });
+
+/* ---------- ローカル用バックアップ ---------- */
+async function exportAll(){
+  const data = {};
+  for(const s of SPOTS){ const it = await Local.get(s.id); if(it.length) data[s.id] = it; }
+  const count = Object.values(data).reduce((a,b) => a + b.length, 0);
+  if(!count) return toast("まだ写真がありません");
+  const blob = new Blob([JSON.stringify({v:2, saved:new Date().toISOString(), data})], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `sado-photos-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+  toast(`${count}枚を書き出しました`);
+}
+function importAll(){
+  const f = Object.assign(document.createElement("input"), {type:"file", accept:"application/json,.json"});
+  f.addEventListener("change", async () => {
+    const file = f.files[0]; if(!file) return;
+    try{
+      const json = JSON.parse(await file.text());
+      if(!json.data) throw 0;
+      let n = 0;
+      for(const [id, items] of Object.entries(json.data)){
+        if(!VALID.has(id)) continue;
+        const norm = items.map(x => typeof x === "string" ? {src:x, who:"", ts:0} : x);
+        const cur = await Local.get(id);
+        const seen = new Set(cur.map(x => x.src));
+        const merged = [...cur, ...norm.filter(x => !seen.has(x.src))];
+        await Local.set(id, merged); localCache[id] = merged; n += norm.length;
+      }
+      render(); refreshPins();
+      toast(`${n}枚を復元しました`);
+    }catch(e){ toast("このファイルは読み込めませんでした"); }
+  });
+  f.click();
+}
+
+/* ---------- トースト ---------- */
+let tt;
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("on");
+  clearTimeout(tt); tt = setTimeout(() => el.classList.remove("on"), 2800);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   5. 起動
+   ═══════════════════════════════════════════════════════════════════════ */
+const modeEl = document.getElementById("mode");
+const gate = document.getElementById("gate");
+
+function showGate(msg){
+  gate.classList.add("on");
+  document.getElementById("g-err").textContent = msg || "";
+  setTimeout(() => document.getElementById("g-mail").focus(), 60);
+}
+
+function stamp(){
+  const total = Object.values(Cloud.all()).reduce((a,b) => a + b.length, 0);
+  modeEl.className = "live";
+  modeEl.innerHTML = `${Me.get() || "ログイン中"}・${total}枚<button type="button" id="out">ログアウト</button>`;
+  document.getElementById("out").addEventListener("click", () => {
+    Auth.out(); Cloud.clear();
+    SPOTS.forEach(s => paint(s.id)); repaintCounts(); refreshPins();
+    modeEl.className = "solo"; modeEl.textContent = "未ログイン";
+    showGate("");
+  });
+}
+
+async function enter(){
+  gate.classList.remove("on");
+  modeEl.className = "live";
+  modeEl.textContent = "読み込み中…";
+  try{
+    await Cloud.refresh();
+    stamp();
+  }catch(e){
+    modeEl.className = "solo";
+    modeEl.textContent = "写真を読み込めません";
+    console.error(e);
+  }
+  SPOTS.forEach(s => paint(s.id));
+  repaintCounts(); refreshPins();
+}
+
+async function doSignIn(){
+  const btn = document.getElementById("g-go");
+  const err = document.getElementById("g-err");
+  const em = document.getElementById("g-mail").value.trim();
+  const pw = document.getElementById("g-pass").value;
+  if(!em || !pw){ err.textContent = "両方を入力してください"; return; }
+  btn.disabled = true; btn.textContent = "確認中…"; err.textContent = "";
+  try{
+    await Auth.signIn(em, pw);
+    document.getElementById("g-pass").value = "";
+    await enter();
+  }catch(e){
+    const m = String(e.message || "");
+    err.textContent =
+      /Invalid login/i.test(m) ? "メールアドレスかパスワードが違います" :
+      /Email not confirmed/i.test(m) ? "メール確認が有効のままです。Supabase の設定を見直してください" :
+      "接続できませんでした（" + m + "）";
+  }finally{
+    btn.disabled = false; btn.textContent = "開く";
+  }
+}
+document.getElementById("g-go").addEventListener("click", doSignIn);
+document.getElementById("g-pass").addEventListener("keydown", e => { if(e.key === "Enter") doSignIn(); });
+
+(async function init(){
+  await Local.open();
+  for(const s of SPOTS) localCache[s.id] = await Local.get(s.id);
+
+  tabs(); render(); draw(null);
+  setTimeout(() => map.invalidateSize(), 200);
+  window.addEventListener("resize", () => map.invalidateSize());
+  window.addEventListener("orientationchange", () => setTimeout(() => map.invalidateSize(), 400));
+
+  if(!CLOUD){
+    modeEl.className = "solo";
+    modeEl.textContent = "この端末のみ";
+    return;
+  }
+  document.addEventListener("visibilitychange", () => {
+    if(!document.hidden && Auth.signedIn()) sync();
+  });
+
+  if(Auth.hasSession() && await Auth.renew()){
+    await enter();
+  }else{
+    modeEl.className = "solo";
+    modeEl.textContent = "未ログイン";
+    showGate("");
+  }
+})();
+</script>
+</body>
+</html>
